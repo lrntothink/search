@@ -1,8 +1,3 @@
-# search
-SpringBoot +  elasticsearch 7.6 + Java High Level REST Client
-删除索引，创建索引，创建管道，索引文件，高亮搜索
-
-
 环境
 Elasticsearch 7.6.0；
 ingest-attachment-7.6.0；
@@ -44,6 +39,7 @@ fvh高亮方式的特点如下：
 5）对于不同的匹配类型分配不同的权重，如：pharse匹配比term匹配高。
 
 创建索引，默认分词为ik_max_word  默认搜索分词为ik_smart ,高亮模式为fast-vector-highlighter 简称fvh高亮方式
+
 //fast-vector-highlighter    "term_vector" : "with_positions_offsets"      
 //postings-highlighter  "index_options" : "offsets"  
 PUT ik_index
@@ -75,6 +71,7 @@ PUT ik_index
 //fragment_size: 设置要显示出来的fragment文本判断的长度，默认是100
 //number_of_fragments：高亮的fragment文本片段显示指定的片段
 //将高亮显示旁边的文字也显示出来的字数
+
 GET /_search
 {
     "query": {
@@ -104,6 +101,7 @@ GET /_search
 
 
 对应Java代码
+
 RestHighLevelClient client = new RestHighLevelClient(
                 RestClient.builder(
                         new HttpHost("localhost", 9200, "http")
@@ -218,6 +216,7 @@ PUT my_index
 }
 
 对应Java代码
+
 CreateIndexRequest request = new CreateIndexRequest("ik_index");
         request.source("{\n" +
                 "  \"settings\": {\n" +
@@ -243,6 +242,7 @@ CreateIndexRequest request = new CreateIndexRequest("ik_index");
 
 
 转变成base64
+
 String str = "初期的知乎，是由高级知识分子，各行业精英组成的小社区。这里就像一个社会沙盘，每一个问题都允许有不同的立场和解读。今天一切的禁忌，在当时都是可以谈的。于是，那时产出了庞大的公知群体;也产出了“知乎之勺\"这种精妙绝伦的脑洞;即使是普世价值为主体的论坛氛围下，也能容得下玄处和马前卒这样的资深五毛。甚至重男轻女的话题下，那个精确描述出农村生态里男性对家庭必要性的答案，也能获得数万的高赞。正是当年的百家争鸣百花齐放，才成就了后来的知乎。";
 		byte[] bytes = str.getBytes();
 		Base64.Encoder encoder = Base64.getEncoder();
@@ -251,13 +251,16 @@ String str = "初期的知乎，是由高级知识分子，各行业精英组成
 
 
 进行索引
+
 PUT my_index/_doc/my_id?pipeline=attachment
 {
   "data": "5Yid5pyf55qE55+l5LmO77yM5piv55Sx6auY57qn55+l6K+G5YiG5a2Q77yM5ZCE6KGM5Lia57K+6Iux57uE5oiQ55qE5bCP56S+5Yy644CC6L+Z6YeM5bCx5YOP5LiA5Liq56S+5Lya5rKZ55uY77yM5q+P5LiA5Liq6Zeu6aKY6YO95YWB6K645pyJ5LiN5ZCM55qE56uL5Zy65ZKM6Kej6K+744CC5LuK5aSp5LiA5YiH55qE56aB5b+M77yM5Zyo5b2T5pe26YO95piv5Y+v5Lul6LCI55qE44CC5LqO5piv77yM6YKj5pe25Lqn5Ye65LqG5bqe5aSn55qE5YWs55+l576k5L2TO+S5n+S6p+WHuuS6huKAnOefpeS5juS5i+WLuiLov5nnp43nsr7lppnnu53kvKbnmoTohJHmtJ475Y2z5L2/5piv5pmu5LiW5Lu35YC85Li65Li75L2T55qE6K665Z2b5rCb5Zu05LiL77yM5Lmf6IO95a655b6X5LiL546E5aSE5ZKM6ams5YmN5Y2S6L+Z5qC355qE6LWE5rex5LqU5q+b44CC55Sa6Iez6YeN55S36L275aWz55qE6K+d6aKY5LiL77yM6YKj5Liq57K+56Gu5o+P6L+w5Ye65Yac5p2R55Sf5oCB6YeM55S35oCn5a+55a625bqt5b+F6KaB5oCn55qE562U5qGI77yM5Lmf6IO96I635b6X5pWw5LiH55qE6auY6LWe44CC5q2j5piv5b2T5bm055qE55m+5a625LqJ6bij55m+6Iqx6b2Q5pS+77yM5omN5oiQ5bCx5LqG5ZCO5p2l55qE55+l5LmO44CC"
 }
+
 GET my_index/_doc/my_id
 
 对应Java代码
+
 String base64 = "5Yid5pyf55qE55+l5LmO77yM5piv55Sx6auY57qn55+l6K+G5YiG5a2Q77yM5ZCE6KGM5Lia57K+6Iux57uE5oiQ55qE5bCP56S+5Yy644CC6L+Z6YeM5bCx5YOP5LiA5Liq56S+5Lya5rKZ55uY77yM5q+P5LiA5Liq6Zeu6aKY6YO95YWB6K645pyJ5LiN5ZCM55qE56uL5Zy65ZKM6Kej6K+744CC5LuK5aSp5LiA5YiH55qE56aB5b+M77yM5Zyo5b2T5pe26YO95piv5Y+v5Lul6LCI55qE44CC5LqO5piv77yM6YKj5pe25Lqn5Ye65LqG5bqe5aSn55qE5YWs55+l576k5L2TO+S5n+S6p+WHuuS6huKAnOefpeS5juS5i+WLuiLov5nnp43nsr7lppnnu53kvKbnmoTohJHmtJ475Y2z5L2/5piv5pmu5LiW5Lu35YC85Li65Li75L2T55qE6K665Z2b5rCb5Zu05LiL77yM5Lmf6IO95a655b6X5LiL546E5aSE5ZKM6ams5YmN5Y2S6L+Z5qC355qE6LWE5rex5LqU5q+b44CC55Sa6Iez6YeN55S36L275aWz55qE6K+d6aKY5LiL77yM6YKj5Liq57K+56Gu5o+P6L+w5Ye65Yac5p2R55Sf5oCB6YeM55S35oCn5a+55a625bqt5b+F6KaB5oCn55qE562U5qGI77yM5Lmf6IO96I635b6X5pWw5LiH55qE6auY6LWe44CC5q2j5piv5b2T5bm055qE55m+5a625LqJ6bij55m+6Iqx6b2Q5pS+77yM5omN5oiQ5bCx5LqG5ZCO5p2l55qE55+l5LmO44CC";
             Map<String,Object> jsonMap = new HashMap<>();
             jsonMap.put("data", base64);
@@ -268,10 +271,12 @@ String base64 = "5Yid5pyf55qE55+l5LmO77yM5piv55Sx6auY57qn55+l6K+G5YiG5a2Q77yM5ZC
             log.info("indexResponse.getIndex():{}  result:{}",indexResponse.getIndex() ,indexResponse.getResult());
 
 查询
+
 GET my_index/_search
 {"query":{"bool":{"must":[{"match":{"attachment.content":"精英知识分子"}}],"must_not":[],"should":[]}},"from":0,"size":10,"sort":[],"aggs":{}}
 
 对应Java代码
+
 	SearchRequest searchRequest = new SearchRequest("ik_index");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             QueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("attachment.content","精英知识分子");
@@ -290,6 +295,7 @@ GET my_index/_search
             }
 
 高亮显示
+
 GET my_index/_search
 {
     "query": {
@@ -313,6 +319,7 @@ GET my_index/_search
 }
 
 对应Java代码
+
 	SearchRequest searchRequest = new SearchRequest("ik_index");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
