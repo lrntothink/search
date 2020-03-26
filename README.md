@@ -1,17 +1,19 @@
-环境
-Elasticsearch 7.6.0；
-ingest-attachment-7.6.0；
+环境<br>
+Elasticsearch 7.6.0；<br>
+ingest-attachment-7.6.0；<br>
 
-在线安装
-进入elasticsearch目录，执行下面的命令进行安装：
-elasticsearch-plugin install ingest-attachment
-安装完需重启各节点。
-离线安装
-先下载离线安装文件：https://artifacts.elastic.co/downloads/elasticsearch-plugins/ingest-attachment/ingest-attachment-7.6.0.zip. ，然后执行安装：
-elasticsearch-plugin.bat install file:///F:/ruanjian/ingest-attachment-7.6.0.zip
+在线安装<br>
+进入elasticsearch目录，执行下面的命令进行安装：<br>
+elasticsearch-plugin install ingest-attachment<br>
+安装完需重启各节点。<br>
+离线安装<br>
+先下载离线安装文件：https://artifacts.elastic.co/downloads/elasticsearch-plugins/ingest-attachment/ingest-attachment-7.6.0.zip. ，<br>
+然后执行安装：
+elasticsearch-plugin.bat install file:///F:/ruanjian/ingest-attachment-7.6.0.zip <br>
 
 
 文件转为base64
+```java
 	File f = new File("d:\\solr-word.pdf");
 	try {
 		FileInputStream fis = new FileInputStream(f);
@@ -22,8 +24,9 @@ elasticsearch-plugin.bat install file:///F:/ruanjian/ingest-attachment-7.6.0.zip
 		System.out.println(base64);
 	} catch (Exception e) {
 	}
+```
 
-
+```text
 
 posting高亮方式的特点：
 1）速度快，不需要对高亮的文档再分析。文档越大，获得越高 性能 。
@@ -40,8 +43,10 @@ fvh高亮方式的特点如下：
 
 创建索引，默认分词为ik_max_word  默认搜索分词为ik_smart ,高亮模式为fast-vector-highlighter 简称fvh高亮方式
 
+```
 //fast-vector-highlighter    "term_vector" : "with_positions_offsets"      
 //postings-highlighter  "index_options" : "offsets"  
+```json
 PUT ik_index
 {
   "settings": {
@@ -98,9 +103,10 @@ GET /_search
         }
     }
 }
-
+```
 
 对应Java代码
+```java
 
 RestHighLevelClient client = new RestHighLevelClient(
                 RestClient.builder(
@@ -132,8 +138,9 @@ RestHighLevelClient client = new RestHighLevelClient(
         }catch (Exception e){
             e.printStackTrace();
         }
-
+```
 索引pdf，doc等文档，先用Java代码将文件转换为base64文字流
+```json
 PUT localhost:9200/_ingest/pipeline/attachment
 {
   "description" : "Extract attachment information",
@@ -155,10 +162,6 @@ GET books/_doc/my_id
 GET localhost:9200/_search
 {"query":{"bool":{"must":[],"must_not":[],"should":[{"match":{"email":"books"}}]}},"from":0,"size":10,"sort":[],"aggs":{}}
 
-
-
-
-
 创建管道
 PUT _ingest/pipeline/attachment
 {
@@ -172,7 +175,9 @@ PUT _ingest/pipeline/attachment
   ]
 }
 
+```
 对应Java代码
+```java
 RestHighLevelClient client = new RestHighLevelClient(
             RestClient.builder(
                 new HttpHost("localhost", 9200, "http")
@@ -197,8 +202,11 @@ String source =
             log.info("deleteIndexResponse.isAcknowledged():{}",deleteIndexResponse.isAcknowledged());
 
 
+```
 
 创建索引，以ik_smart进行分词
+```json
+
 PUT my_index
 {
   "settings": {
@@ -215,7 +223,9 @@ PUT my_index
   }
 }
 
+```
 对应Java代码
+```java
 
 CreateIndexRequest request = new CreateIndexRequest("ik_index");
         request.source("{\n" +
@@ -249,8 +259,10 @@ String str = "初期的知乎，是由高级知识分子，各行业精英组成
         String base64 = encoder.encodeToString(bytes);
         System.out.println(base64);
 
+```
 
 进行索引
+```json
 
 PUT my_index/_doc/my_id?pipeline=attachment
 {
@@ -258,8 +270,9 @@ PUT my_index/_doc/my_id?pipeline=attachment
 }
 
 GET my_index/_doc/my_id
-
+```
 对应Java代码
+```java
 
 String base64 = "5Yid5pyf55qE55+l5LmO77yM5piv55Sx6auY57qn55+l6K+G5YiG5a2Q77yM5ZCE6KGM5Lia57K+6Iux57uE5oiQ55qE5bCP56S+5Yy644CC6L+Z6YeM5bCx5YOP5LiA5Liq56S+5Lya5rKZ55uY77yM5q+P5LiA5Liq6Zeu6aKY6YO95YWB6K645pyJ5LiN5ZCM55qE56uL5Zy65ZKM6Kej6K+744CC5LuK5aSp5LiA5YiH55qE56aB5b+M77yM5Zyo5b2T5pe26YO95piv5Y+v5Lul6LCI55qE44CC5LqO5piv77yM6YKj5pe25Lqn5Ye65LqG5bqe5aSn55qE5YWs55+l576k5L2TO+S5n+S6p+WHuuS6huKAnOefpeS5juS5i+WLuiLov5nnp43nsr7lppnnu53kvKbnmoTohJHmtJ475Y2z5L2/5piv5pmu5LiW5Lu35YC85Li65Li75L2T55qE6K665Z2b5rCb5Zu05LiL77yM5Lmf6IO95a655b6X5LiL546E5aSE5ZKM6ams5YmN5Y2S6L+Z5qC355qE6LWE5rex5LqU5q+b44CC55Sa6Iez6YeN55S36L275aWz55qE6K+d6aKY5LiL77yM6YKj5Liq57K+56Gu5o+P6L+w5Ye65Yac5p2R55Sf5oCB6YeM55S35oCn5a+55a625bqt5b+F6KaB5oCn55qE562U5qGI77yM5Lmf6IO96I635b6X5pWw5LiH55qE6auY6LWe44CC5q2j5piv5b2T5bm055qE55m+5a625LqJ6bij55m+6Iqx6b2Q5pS+77yM5omN5oiQ5bCx5LqG5ZCO5p2l55qE55+l5LmO44CC";
             Map<String,Object> jsonMap = new HashMap<>();
@@ -270,13 +283,16 @@ String base64 = "5Yid5pyf55qE55+l5LmO77yM5piv55Sx6auY57qn55+l6K+G5YiG5a2Q77yM5ZC
             IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
             log.info("indexResponse.getIndex():{}  result:{}",indexResponse.getIndex() ,indexResponse.getResult());
 
+```
 查询
+```json
 
 GET my_index/_search
 {"query":{"bool":{"must":[{"match":{"attachment.content":"精英知识分子"}}],"must_not":[],"should":[]}},"from":0,"size":10,"sort":[],"aggs":{}}
 
+```
 对应Java代码
-
+```java
 	SearchRequest searchRequest = new SearchRequest("ik_index");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             QueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("attachment.content","精英知识分子");
@@ -293,8 +309,10 @@ GET my_index/_search
                 String content = (String)map.get("content");
                 log.info("content:{}",content);
             }
-
+```
 高亮显示
+```json
+
 
 GET my_index/_search
 {
@@ -317,9 +335,9 @@ GET my_index/_search
         }
     }
 }
-
+```
 对应Java代码
-
+```java
 	SearchRequest searchRequest = new SearchRequest("ik_index");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
@@ -340,3 +358,4 @@ GET my_index/_search
                 String fragmentString = fragments[0].string();
                 System.out.println(fragmentString);
             }
+```
