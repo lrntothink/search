@@ -51,6 +51,13 @@ import java.util.Map;
 @Slf4j
 class SearchApplicationTests {
     @Test
+    void tt(){
+        File f = new File("d:/listall.txt");
+        log.info(f.getName());
+        log.info(f.getAbsoluteFile()+"");
+        log.info(f.getAbsolutePath());
+    }
+    @Test
     void base64(){
         String str = "我担心的是，奥运相关的行业会变得更加集中，大企业有能力存活下去，而更多小企业倒闭或者被吞并，导致市场竞争被进一步削弱、垄断的可能性更明显。";
         try {
@@ -151,6 +158,8 @@ class SearchApplicationTests {
         try {
             Map<String, Object> jsonMap = new HashMap<>();
             jsonMap.put("data", Base64.getEncoder().encodeToString(str.getBytes("utf-8")));
+            jsonMap.put("title","test.pdf");
+            jsonMap.put("url","d:/test.pdf");
             IndexRequest indexRequest = new IndexRequest("ik_index")
                     .setPipeline("attachment")
                     .source(jsonMap);
@@ -185,8 +194,10 @@ class SearchApplicationTests {
                         byte[] bytes = new byte[fis.available()];
                         fis.read(bytes);
                         try {
-                            Map<String, Object> jsonMap = new HashMap<>();
+                            Map<String, String> jsonMap = new HashMap<>();
                             jsonMap.put("data", Base64.getEncoder().encodeToString(bytes));
+                            jsonMap.put("title",f.getName());
+                            jsonMap.put("url",f.getAbsolutePath());
                             IndexRequest indexRequest = new IndexRequest("ik_index")
                                     .setPipeline("attachment")
                                     .source(jsonMap);
@@ -224,20 +235,28 @@ class SearchApplicationTests {
         SearchRequest searchRequest = new SearchRequest("ik_index");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-        QueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("attachment.content","源泉");
+        QueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("attachment.content","奥运");
         searchSourceBuilder.query(matchQueryBuilder);
         try {
             HighlightBuilder highlightBuilder = new HighlightBuilder();
             HighlightBuilder.Field highlightTitle = new HighlightBuilder.Field("attachment.content");
+
             highlightTitle.highlighterType("fvh");
             highlightTitle.fragmentSize(60);
             highlightTitle.noMatchSize(50);
             highlightBuilder.preTags("<b>").postTags("</b>");
             highlightBuilder.field(highlightTitle);
+
+//            highlightBuilder.field(new HighlightBuilder.Field("title"));
+//            highlightBuilder.field(new HighlightBuilder.Field("url"));
+
             searchSourceBuilder.highlighter(highlightBuilder);
             SearchResponse searchResponse = client.search(searchRequest.source(searchSourceBuilder), RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
             for (SearchHit hit : hits.getHits()) {
+                Map map = hit.getSourceAsMap();
+                log.info("map.get(\"title\"){}",map.get("title"));
+                log.info("map.get(\"url\"){}",map.get("url"));
                 Map<String, HighlightField> highlightFields = hit.getHighlightFields();
                 HighlightField highlight = highlightFields.get("attachment.content");
                 Text[] fragments = highlight.fragments();
