@@ -2,11 +2,12 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ" %>
+<%@ page import="org.yaml.snakeyaml.util.UriEncoder" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
     String queryBack = (String) request.getAttribute("queryBack");
-    ArrayList<Map<String, Object>> newslist = (ArrayList<Map<String, Object>>) request.getAttribute("newslist");
+    ArrayList<Map<String, String>> newslist = (ArrayList<Map<String, String>>) request.getAttribute("newslist");
     String totalHits = (String) request.getAttribute("totalHits");
     String totalTime = (String) request.getAttribute("totalTime");
     int pages = Integer.parseInt(totalHits) / 10 + 1;
@@ -144,14 +145,15 @@
 <div class="newslist">
     <%
         if (newslist.size() > 0) {
-            Iterator<Map<String, Object>> iter = newslist.iterator();
+            Iterator<Map<String, String>> iter = newslist.iterator();
             while (iter.hasNext()) {
-                Map<String, Object> news = iter.next();
+                Map<String, String> news = iter.next();
                 String content = news.get("content").toString();
                 //content = content.length() > 200 ? content.substring(0, 200) : content;
+                String url = news.get("url");
     %>
     <div class="news">
-        <h4><a href="<%=news.get("url")%>" target="_blank"><%=news.get("title")%>
+        <h4><a href="/showContent?filePath=<%=UriEncoder.encode(url)%>" target="_blank"><%=news.get("title")%>
         </a></h4>
         <p><%=content%> ...
         </p>

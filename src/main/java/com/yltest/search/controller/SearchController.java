@@ -16,11 +16,12 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,27 @@ public class SearchController {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("index");
         return mv;
+    }
+    @ResponseBody
+    @RequestMapping("showContent")
+    public String productSave(HttpServletRequest request){
+        String file = request.getParameter("filePath").trim();
+        log.info("=================showContent:{}",file);
+        StringBuilder sb = new StringBuilder();
+        String fileReturn = "not found";
+        try {
+            if(file.trim().length()>0) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line).append("<br>");
+                }
+                fileReturn = sb.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileReturn;
     }
     @RequestMapping(value="search")
     public ModelAndView search(HttpServletRequest request){
@@ -96,7 +118,7 @@ public class SearchController {
                 Text[] fragments = highlight.fragments();
                 String fragmentString = fragments[0].string();
                 map.put("content",fragmentString);
-                log.info("fragmentString[{}]",fragmentString);
+//                log.info("fragmentString[{}]",fragmentString);
                 newslist.add(map);
             }
             totalHits = hits.getTotalHits().value;
